@@ -2,6 +2,7 @@ package net.ebank.ms.ebankchatbot.controller;
 
 
 import net.ebank.ms.ebankchatbot.agents.EbankAgentAI;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +22,7 @@ public class EbankChatbotController {
 
     @GetMapping("/chat")
     public String chat(@RequestParam(name = "query", defaultValue = "Bonjour") String query) {
-        return ebankAgentAI.chat(query);
+        return ebankAgentAI.chat(new Prompt(query));
     }
 
 }
