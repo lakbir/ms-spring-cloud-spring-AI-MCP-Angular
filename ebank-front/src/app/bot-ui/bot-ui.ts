@@ -31,7 +31,7 @@ export class BotUi {
 
   askAgentStream() {
     this.response$ = this.http
-      .get("http://localhost:8888/EBANK-BOT/chatStream?query=" + this.query,
+      .get("http://localhost:8888/EBANK-CHATBOT/chatStream?query=" + this.query,
         {responseType: "text", observe : 'events', reportProgress: true})
       .pipe(
         map(event => {

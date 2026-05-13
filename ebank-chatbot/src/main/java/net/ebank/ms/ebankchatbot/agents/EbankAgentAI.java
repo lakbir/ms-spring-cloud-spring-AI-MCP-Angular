@@ -7,6 +7,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 /**
  * Created by lakbir.abderrahim on 11/05/2026
@@ -34,5 +35,9 @@ public class EbankAgentAI {
 
     public String chat(Prompt prompt) {
         return chatClient.prompt(prompt).call().content();
+    }
+
+    public Flux<String> chatStream(Prompt prompt) {
+        return chatClient.prompt(prompt).stream().content();
     }
 }
