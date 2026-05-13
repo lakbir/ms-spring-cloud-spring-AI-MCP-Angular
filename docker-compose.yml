@@ -1,0 +1,151 @@
+version: '3.9'
+
+services:
+  # ========================
+  # 1. Discovery Service (Eureka)
+  # ========================
+  discovery:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: ebank-discovery-service
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    ports:
+      - "8761:8761"
+    networks:
+      - ebank-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================
+  # 2. Ebank Service
+  # ========================
+  ebank-service:
+    build:
+      context: .
+      dockerfile: ebank-service/Dockerfile
+    container_name: ebank-service
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+    ports:
+      - "8057:8057"
+    depends_on:
+      discovery:
+        condition: service_healthy
+    networks:
+      - ebank-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================
+  # 3. Customer Service
+  # ========================
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    container_name: ebank-customer-service
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+    ports:
+      - "8056:8056"
+    depends_on:
+      ebank-service:
+        condition: service_healthy
+    networks:
+      - ebank-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================
+  # 4. Gateway Service
+  # ========================
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: ebank-gateway-service
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+    ports:
+      - "8888:8888"
+    depends_on:
+      customer-service:
+        condition: service_healthy
+    networks:
+      - ebank-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================
+  # 5. Ebank Chatbot Service
+  # ========================
+  ebank-chatbot:
+    build:
+      context: .
+      dockerfile: ebank-chatbot/Dockerfile
+    container_name: ebank-chatbot-service
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery:8761/eureka/
+      - API_KEY=${API_KEY:-your-api-key-here}
+    ports:
+      - "8058:8058"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - ebank-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================
+  # 6. Frontend (Angular + Nginx)
+  # ========================
+  frontend:
+    build:
+      context: .
+      dockerfile: ebank-front/Dockerfile
+    container_name: ebank-frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      ebank-chatbot:
+        condition: service_healthy
+    networks:
+      - ebank-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  ebank-network:
+    driver: bridge
+

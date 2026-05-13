@@ -1,0 +1,17 @@
+**/.git
+**/.gitignore
+**/.dockerignore
+**/node_modules
+**/npm-debug.log
+**/target
+**/.idea
+**/dist
+**/.angular
+**/.env.local
+**/.env.*.local
+**/README.md
+**/HELP.md
+**/.mvn
+**/mvnw
+**/mvnw.cmd
+
